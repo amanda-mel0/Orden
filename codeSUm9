@@ -1,0 +1,107 @@
+#define CUSTOM_SETTINGS
+#define INCLUDE_GAMEPAD_MODULE
+#include <DabbleESP32.h>
+
+// Definições dos pinos dos motores
+#define INT1 22
+#define INT2 21
+#define INT3 19
+#define INT4 18
+#define ENA 23
+#define ENB 5
+
+// PWM - Frequência e Resolução
+#define PWM_FREQ 5000
+#define PWM_RES 8  // 8 bits: 0 a 255
+
+// Canais PWM
+#define CH_ENA 0
+#define CH_ENB 1
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  Serial.println("Iniciando Bluetooth...");
+  Dabble.begin("MeuRoboSumo");
+
+  // Configura pinos de direção
+  pinMode(INT1, OUTPUT);
+  pinMode(INT2, OUTPUT);
+  pinMode(INT3, OUTPUT);
+  pinMode(INT4, OUTPUT);
+
+  // Configura canais PWM
+  ledcSetup(CH_ENA, PWM_FREQ, PWM_RES);
+  ledcAttachPin(ENA, CH_ENA);
+  ledcSetup(CH_ENB, PWM_FREQ, PWM_RES);
+  ledcAttachPin(ENB, CH_ENB);
+
+  Stop(); // Inicia parado
+}
+
+void loop() {
+  Dabble.processInput();  // Lê comandos do Dabble
+
+  if (GamePad.isUpPressed()) {
+    forward();
+  } else if (GamePad.isDownPressed()) {
+    backward();
+  } else if (GamePad.isLeftPressed()) {
+    left();
+  } else if (GamePad.isRightPressed()) {
+    right();
+  } else {
+    Stop();
+  }
+}
+
+void forward() {
+  Serial.println("FRENTE");
+  digitalWrite(INT1, LOW);
+  digitalWrite(INT2, HIGH);
+  digitalWrite(INT3, HIGH);
+  digitalWrite(INT4, LOW);
+  ledcWrite(CH_ENA, 200);
+  ledcWrite(CH_ENB, 200);
+}
+
+void backward() {
+  Serial.println("TRÁS");
+  digitalWrite(INT1, HIGH);
+  digitalWrite(INT2, LOW);
+  digitalWrite(INT3, LOW);
+  digitalWrite(INT4, HIGH);
+  ledcWrite(CH_ENA, 200);
+  ledcWrite(CH_ENB, 200);
+}
+
+void left() {
+  Serial.println("ESQUERDA");
+  digitalWrite(INT1, HIGH);
+  digitalWrite(INT2, LOW);
+  digitalWrite(INT3, HIGH);
+  digitalWrite(INT4, LOW);
+  ledcWrite(CH_ENA, 200);
+  ledcWrite(CH_ENB, 200);
+}
+
+void right() {
+  Serial.println("DIREITA");
+  digitalWrite(INT1, LOW);
+  digitalWrite(INT2, HIGH);
+  digitalWrite(INT3, LOW);
+  digitalWrite(INT4, HIGH);
+  ledcWrite(CH_ENA, 200);
+  ledcWrite(CH_ENB, 200);
+}
+
+void Stop() {
+  Serial.println("PARADO");
+  digitalWrite(INT1, LOW);
+  digitalWrite(INT2, LOW);
+  digitalWrite(INT3, LOW);
+  digitalWrite(INT4, LOW);
+  ledcWrite(CH_ENA, 0);
+  ledcWrite(CH_ENB, 0);
+}
